@@ -26,14 +26,6 @@ steem.api.streamTransactions('head', function(err, result) {
       StreamVote(data.author, data.permlink, weight, comment);
       console.log('@' + data.voter + ' Just voted now!');
     }
-    if (data.voter == 'sachincool') {
-      console.log(data);
-      weight = data.weight * 0.15;
-      weight = weight > 15000 ? 15000 : weight;
-      let comment = `#### Hi @${data.author}!\n\nYour post was upvoted by utopian.io in cooperation with ${data.voter} - supporting knowledge, innovation and technological advancement on the Steem Blockchain.\n\n#### Contribute to Open Source with utopian.io\nLearn how to contribute on <a href="https://join.utopian.io">our website</a> and join the new open source economy.\n\n**Want to chat? Join the Utopian Community on Discord https://discord.gg/h52nFrV**`
-      StreamVote(data.author, data.permlink, weight, comment);
-      console.log('@' + data.voter + ' Just voted now!');
-    }
   }
 });
 
