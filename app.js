@@ -15,7 +15,9 @@ steem.api.streamTransactions('head', function(err, result) {
       weight = data.weight * 0.15;
       weight = weight > 15000 ? 15000 : weight;
       let comment = `#### Hi @${data.author}!\n\nYour post was upvoted by utopian.io in cooperation with ${data.voter} - supporting knowledge, innovation and technological advancement on the Steem Blockchain.\n\n#### Contribute to Open Source with utopian.io\nLearn how to contribute on <a href="https://join.utopian.io">our website</a> and join the new open source economy.\n\n**Want to chat? Join the Utopian Community on Discord https://discord.gg/h52nFrV**`
-      StreamVote(data.author, data.permlink, weight, comment);
+      setTimeout(function() {
+        StreamVote(data.author, data.permlink, weight, comment)
+      },30000);
       console.log('@' + data.voter + ' Just voted now!');
     }
     if (data.voter == 'steemmakers') {
@@ -23,7 +25,9 @@ steem.api.streamTransactions('head', function(err, result) {
       weight = data.weight * 0.05;
       weight = weight > 5000 ? 5000 : weight;
       let comment = `#### Hi @${data.author}!\n\nYour post was upvoted by utopian.io in cooperation with ${data.voter} - supporting knowledge, innovation and technological advancement on the Steem Blockchain.\n\n#### Contribute to Open Source with utopian.io\nLearn how to contribute on <a href="https://join.utopian.io">our website</a> and join the new open source economy.\n\n**Want to chat? Join the Utopian Community on Discord https://discord.gg/h52nFrV**`
-      StreamVote(data.author, data.permlink, weight, comment);
+      setTimeout(function() {
+        StreamVote(data.author, data.permlink, weight, comment)
+      },30000);
       console.log('@' + data.voter + ' Just voted now!');
     }
   }
@@ -54,4 +58,5 @@ function StreamVote(author, permalink, weight, comment) {
       console.log('Post is already voted by Utopian-io');
     }
   })
+  return true;
 }
