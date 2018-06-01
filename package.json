@@ -13,6 +13,7 @@
   "author": "ms10398",
   "license": "MIT",
   "dependencies": {
-    "steem": "^0.7.1"
+    "steem": "^0.7.1",
+    "watson-developer-cloud": "^3.4.3"
   }
 }
