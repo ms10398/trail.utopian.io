@@ -47,76 +47,80 @@ steem.api.streamTransactions('head', function(err, result) {
 
 function StreamVote(author, permalink, weight, comment, check_context = false) {
     steem.api.getContent(author, permalink, function(err, result) {
-        if (JSON.parse(result.json_metadata).tags[0] != 'utopian-io' && result.depth == 0) {
-            if (check_context) {
-                nlu.analyze({
-                        text: result.body,
-                        features: {
-                            categories: {}
-                        }
-                    },
-                    function(err, response) {
-                        if (err) {
-                            console.log('error:', err);
-                        } else {
-                            console.log(response);
-                            let vote = false;
-                            console.log('First check for labels');
-                            console.log(response.categories[0].label);
-                            var i;
-                            for(i = 0; i < response.categories.length; i++) {
-                                const category = response.categories[i];
-
-                                if (labels.indexOf(category.label) > -1 && category.score > 0.4) vote = true;
+        if (!err) {
+            if (JSON.parse(result.json_metadata).tags[0] != 'utopian-io' && result.depth == 0) {
+                if (check_context) {
+                    nlu.analyze({
+                            text: result.body,
+                            features: {
+                                categories: {}
                             }
-                            console.log(vote);
-                            if (vote == true) {
-                                steem.broadcast.vote(ACC_KEY, ACC_NAME, author, permalink, weight, function(err, result) {
-                                    if (err)
-                                        console.log(err);
-                                    else {
-                                        console.log('Voted Succesfully, permalink: ' + permalink + ', author: ' + author + ', weight: ' + weight / 100 + '%.');
-                                        let newpermlink = new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-                                        steem.broadcast.comment(ACC_KEY, author, permalink, ACC_NAME, newpermlink, '', comment, {
-                                            tags: ['utopian.tip'],
-                                            app: 'utopian-io'
-                                        }, function(err, result) {
-                                            if (err) {
-                                                console.log(err);
-                                            } else {
-                                                console.log('Commented on the post');
-                                            }
-                                        });
-                                    }
-                                });
-                            } else {
-                                console.log('Post is not eligible to get upvote. It is unrelated.');
-                            }
-                        }
-                    })
-            } else {
-                steem.broadcast.vote(ACC_KEY, ACC_NAME, author, permalink, weight, function(err, result) {
-                    if (err)
-                        console.log(err);
-                    else {
-                        console.log('Voted Succesfully, permalink: ' + permalink + ', author: ' + author + ', weight: ' + weight / 100 + '%.');
-                        let newpermlink = new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-                        steem.broadcast.comment(ACC_KEY, author, permalink, ACC_NAME, newpermlink, '', comment, {
-                            tags: ['utopian.tip'],
-                            app: 'utopian-io'
-                        }, function(err, result) {
+                        },
+                        function(err, response) {
                             if (err) {
-                                console.log(err);
+                                console.log('error:', err);
                             } else {
-                                console.log('Commented on the post');
+                                console.log(response);
+                                let vote = false;
+                                console.log('First check for labels');
+                                console.log(response.categories[0].label);
+                                var i;
+                                for(i = 0; i < response.categories.length; i++) {
+                                    const category = response.categories[i];
+
+                                    if (labels.indexOf(category.label) > -1 && category.score > 0.4) vote = true;
+                                }
+                                console.log(vote);
+                                if (vote == true) {
+                                    steem.broadcast.vote(ACC_KEY, ACC_NAME, author, permalink, weight, function(err, result) {
+                                        if (err)
+                                            console.log(err);
+                                        else {
+                                            console.log('Voted Succesfully, permalink: ' + permalink + ', author: ' + author + ', weight: ' + weight / 100 + '%.');
+                                            let newpermlink = new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+                                            steem.broadcast.comment(ACC_KEY, author, permalink, ACC_NAME, newpermlink, '', comment, {
+                                                tags: ['utopian.tip'],
+                                                app: 'utopian-io'
+                                            }, function(err, result) {
+                                                if (err) {
+                                                    console.log(err);
+                                                } else {
+                                                    console.log('Commented on the post');
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    console.log('Post is not eligible to get upvote. It is unrelated.');
+                                }
                             }
-                        });
-                    }
-                });
+                        })
+                } else {
+                    steem.broadcast.vote(ACC_KEY, ACC_NAME, author, permalink, weight, function(err, result) {
+                        if (err)
+                            console.log(err);
+                        else {
+                            console.log('Voted Succesfully, permalink: ' + permalink + ', author: ' + author + ', weight: ' + weight / 100 + '%.');
+                            let newpermlink = new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+                            steem.broadcast.comment(ACC_KEY, author, permalink, ACC_NAME, newpermlink, '', comment, {
+                                tags: ['utopian.tip'],
+                                app: 'utopian-io'
+                            }, function(err, result) {
+                                if (err) {
+                                    console.log(err);
+                                } else {
+                                    console.log('Commented on the post');
+                                }
+                            });
+                        }
+                    });
+                }
+            } else {
+                console.log('Not eligible for vote');
             }
-        } else {
-            console.log('Post is already voted by Utopian-io');
         }
+
+        if (err) console.log(err);
     })
     return true;
 }
