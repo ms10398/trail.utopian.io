@@ -17,26 +17,32 @@ console.log("Curation Trail Bot Script Running...");
 console.log("Waiting for votes from steemstem, steemmakers");
 
 steem.api.streamTransactions('head', function(err, result) {
-    const type = result.operations[0][0];
-    const data = result.operations[0][1];
-    let weight = 0;
-    if (type == 'vote') {
-        var i;
-        for (i = 0; i < following.length; i++) {
-            const followed = following[i];
 
-            if (data.voter == followed.account) {
-                console.log(data);
-                weight = data.weight * followed.weight_divider;
-                weight = weight > followed.max_weight ? followed.max_weight : weight;
-                let comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
-                setTimeout(function() {
-                    StreamVote(data.author, data.permlink, weight, comment, followed.check_context)
-                },30000);
-                console.log('@' + data.voter + ' Just voted now!');
-            }
-        }
-    }
+  if (!err) {
+      const type = result.operations[0][0];
+      const data = result.operations[0][1];
+      let weight = 0;
+      if (type == 'vote') {
+          var i;
+          for (i = 0; i < following.length; i++) {
+              const followed = following[i];
+
+              if (data.voter == followed.account) {
+                  console.log(data);
+                  weight = data.weight * followed.weight_divider;
+                  weight = weight > followed.max_weight ? followed.max_weight : weight;
+                  let comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
+                  setTimeout(function() {
+                      StreamVote(data.author, data.permlink, weight, comment, followed.check_context)
+                  },30000);
+                  console.log('@' + data.voter + ' Just voted now!');
+              }
+          }
+      }
+  }
+
+  if (err) console.log(err);
+
 });
 
 function StreamVote(author, permalink, weight, comment, check_context = false) {
@@ -57,24 +63,11 @@ function StreamVote(author, permalink, weight, comment, check_context = false) {
                             let vote = false;
                             console.log('First check for labels');
                             console.log(response.categories[0].label);
-                            for (cat in labels) {
-                                console.log(labels[cat]);
-                                if (response.categories[0].label == labels[cat]) {
-                                    vote = true;
-                                    console.log(vote);
-                                    break;
-                                }
-                            }
-                            if (vote == false) {
-                                if (response.categories[1].score > 0.5) {
-                                    console.log('Second check for labels');
-                                    for (cat in labels) {
-                                        if (response.categories[1].label == labels[cat]) {
-                                            vote = true;
-                                            break;
-                                        }
-                                    }
-                                }
+                            var i;
+                            for(i = 0; i < response.categories.length; i++) {
+                                const category = response.categories[i];
+
+                                if (labels.indexOf(category.label) > -1 && category.score > 0.4) vote = true;
                             }
                             console.log(vote);
                             if (vote == true) {
