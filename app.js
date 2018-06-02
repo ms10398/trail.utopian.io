@@ -22,7 +22,7 @@ steem.api.streamTransactions('head', function(err, result) {
       const type = result.operations[0][0];
       const data = result.operations[0][1];
       let weight = 0;
-      if (type == 'vote') {
+      if (type == 'vote' && !(data.voter == data.author)) {
           var i;
           for (i = 0; i < following.length; i++) {
               const followed = following[i];
@@ -47,7 +47,7 @@ steem.api.streamTransactions('head', function(err, result) {
 
 function StreamVote(author, permalink, weight, comment, check_context = false) {
     steem.api.getContent(author, permalink, function(err, result) {
-        if (JSON.parse(result.json_metadata).tags[0] != 'utopian-io') {
+        if (JSON.parse(result.json_metadata).tags[0] != 'utopian-io' && result.depth == 0) {
             if (check_context) {
                 nlu.analyze({
                         text: result.body,
