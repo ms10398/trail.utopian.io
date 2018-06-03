@@ -16,6 +16,11 @@ const ACC_NAME = config.accname,
 console.log("Curation Trail Bot Script Running...");
 console.log("Waiting for votes from steemstem, steemmakers");
 
+process.on('uncaughtException', function(err) {
+  // added to avoid crashing the script at steemit apis errors
+    console.log('Caught exception: ' + err);
+});
+
 steem.api.streamTransactions('head', function(err, result) {
   if (!err) {
     try {
