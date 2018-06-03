@@ -62,36 +62,39 @@ function StreamVote(author, permalink, weight, comment, check_context = false) {
             if (!err) {
                 if (JSON.parse(result.json_metadata).tags[0] != 'utopian-io' && result.depth == 0) {
                     if (check_context) {
-                        nlu.analyze({
-                                text: result.body,
-                                features: {
-                                    categories: {}
-                                }
-                            },
-                            function(err, response) {
-                                if (err) {
-                                    console.log('error:', err);
-                                }
-
-                                if (!err && response) {
-                                    console.log(response);
-                                    let vote = false;
-                                    console.log('First check for labels');
-                                    var i;
-                                    for(i = 0; i < response.categories.length; i++) {
-                                        const category = response.categories[i];
-
-                                        if (labels.indexOf(category.label) > -1 && category.score > 0.4) vote = true;
+                        try {
+                            nlu.analyze({
+                                    text: result.body,
+                                    features: {
+                                        categories: {}
                                     }
-                                    console.log(vote);
-
-                                    if (vote == true) {
-                                        applyVote(ACC_KEY, ACC_NAME, author, permalink, weight, comment);
+                                },
+                                function(err, response) {
+                                    if (err) {
+                                        console.log('error:', err);
                                     }
-                                }
-                            })
+
+                                    if (!err && response) {
+                                        console.log(response);
+                                        let vote = false;
+                                        console.log('First check for labels');
+                                        var i;
+                                        for(i = 0; i < response.categories.length; i++) {
+                                            const category = response.categories[i];
+
+                                            if (labels.indexOf(category.label) > -1 && category.score > 0.4) vote = true;
+                                        }
+                                        console.log(vote);
+
+                                        if (vote == true) {
+                                            applyVote(ACC_KEY, ACC_NAME, author, permalink, weight, comment);
+                                        }
+                                    }
+                                })
+                        }catch(e) {
+                            console.log(e)
+                        }
                     }
-
                     if (!check_context) {
                         applyVote(ACC_KEY, ACC_NAME, author, permalink, weight, comment);
                     }
