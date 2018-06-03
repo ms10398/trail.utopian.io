@@ -77,7 +77,6 @@ function StreamVote(author, permalink, weight, comment, check_context = false) {
                                     console.log(response);
                                     let vote = false;
                                     console.log('First check for labels');
-                                    console.log(response.categories[0].label);
                                     var i;
                                     for(i = 0; i < response.categories.length; i++) {
                                         const category = response.categories[i];
