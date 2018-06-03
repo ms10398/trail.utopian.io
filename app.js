@@ -18,43 +18,37 @@ const ACC_NAME = config.accname,
 console.log("Curation Trail Bot Script Running...");
 console.log("Waiting for votes from steemstem, steemmakers");
 
-function run () {
-  try {
-      steem.api.streamTransactions('head', function(err, result) {
-          if (!err) {
-              try {
-                  const type = result.operations[0][0];
-                  const data = result.operations[0][1];
-                  let weight = 0;
+steem.api.streamTransactions('head', function(err, result) {
+    if (!err) {
+        try {
+            const type = result.operations[0][0];
+            const data = result.operations[0][1];
+            let weight = 0;
 
-                  if (type == 'vote' && !(data.voter == data.author)) {
-                      var i;
-                      for (i = 0; i < following.length; i++) {
-                          const followed = following[i];
+            if (type == 'vote' && !(data.voter == data.author)) {
+                var i;
+                for (i = 0; i < following.length; i++) {
+                    const followed = following[i];
 
-                          if (data.voter == followed.account) {
-                              console.log(data);
-                              weight = Math.round(data.weight * followed.weight_divider);
-                              weight = weight > followed.max_weight ? followed.max_weight : weight;
-                              let comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
-                              setTimeout(function() {
-                                  StreamVote(data.author, data.permlink, weight, comment, followed.check_context)
-                              },45000);
-                              console.log('@' + data.voter + ' Just voted now!');
-                          }
-                      }
-                  }
-              }catch(e) {
-                  console.log(e)
-              }
-          }
+                    if (data.voter == followed.account) {
+                        console.log(data);
+                        weight = Math.round(data.weight * followed.weight_divider);
+                        weight = weight > followed.max_weight ? followed.max_weight : weight;
+                        let comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
+                        setTimeout(function() {
+                            StreamVote(data.author, data.permlink, weight, comment, followed.check_context)
+                        },45000);
+                        console.log('@' + data.voter + ' Just voted now!');
+                    }
+                }
+            }
+        }catch(e) {
+            console.log(e)
+        }
+    }
 
-          if (err) console.log(err);
-      });
-  }catch(e){
-    console.log(e)
-  }
-}
+    if (err) console.log(err);
+});
 
 function StreamVote(author, permalink, weight, comment, check_context = false) {
     try {
@@ -136,5 +130,3 @@ function applyVote (ACC_KEY, ACC_NAME, author, permalink, weight, comment) {
         console.log(e);
     }
 }
-
-run();
