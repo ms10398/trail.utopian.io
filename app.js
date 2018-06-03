@@ -34,7 +34,7 @@ function run () {
 
                           if (data.voter == followed.account) {
                               console.log(data);
-                              weight = data.weight * followed.weight_divider;
+                              weight = Math.round(data.weight * followed.weight_divider);
                               weight = weight > followed.max_weight ? followed.max_weight : weight;
                               let comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
                               setTimeout(function() {
