@@ -4,6 +4,8 @@ const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-l
 const labels = config.labels;
 const following = config.following;
 
+steem.api.setOptions({ url: 'http://rpc.buildteam.io/' });
+
 const nlu = new NaturalLanguageUnderstandingV1({
     username: config.username,
     password: config.password,
@@ -37,7 +39,7 @@ function run () {
                               let comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
                               setTimeout(function() {
                                   StreamVote(data.author, data.permlink, weight, comment, followed.check_context)
-                              },30000);
+                              },45000);
                               console.log('@' + data.voter + ' Just voted now!');
                           }
                       }
