@@ -76,7 +76,7 @@ function StreamVote(author, permalink, weight, comment, check_context = false) {
                                         for(i = 0; i < response.categories.length; i++) {
                                             const category = response.categories[i];
 
-                                            if (labels.indexOf(category.label) > -1 && category.score > 0.4) vote = true;
+                                            if (labels.indexOf(category.label) > -1 && category.score > 0.5) vote = true;
                                         }
                                         console.log(vote);
 
