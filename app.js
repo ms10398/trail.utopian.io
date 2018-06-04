@@ -54,7 +54,16 @@ function StreamVote(author, permalink, weight, comment, check_context = false) {
     try {
         steem.api.getContent(author, permalink, function(err, result) {
             if (!err) {
-                if (JSON.parse(result.json_metadata).tags[0] != 'utopian-io' && result.depth == 0) {
+                let hasVoted = false;
+
+                var v;
+                for(v = 0; v < result.active_votes.length; v++) {
+                    const activeVote = result.active_votes[v];
+
+                    if (activeVote.voter === 'utopian-io') hasVoted = true;
+                }
+
+                if (!hasVoted && JSON.parse(result.json_metadata).tags[0] != 'utopian-io' && result.depth == 0) {
                     if (check_context) {
                         try {
                             nlu.analyze({
