@@ -25,7 +25,7 @@ steem.api.streamTransactions('head', function(err, result) {
             const data = result.operations[0][1];
             let weight = 0;
 
-            if (type == 'vote' && !(data.voter == data.author)) {
+            if (type === 'vote' && data.voter !== data.author) {
                 var i;
                 for (i = 0; i < following.length; i++) {
                     const followed = following[i];
@@ -34,10 +34,10 @@ steem.api.streamTransactions('head', function(err, result) {
                         console.log(data);
                         weight = Math.round(data.weight * followed.weight_divider);
                         weight = weight > followed.max_weight ? followed.max_weight : weight;
-                        let comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
+                        var comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
                         setTimeout(function() {
                             StreamVote(data.author, data.permlink, weight, comment, followed.check_context)
-                        },45000);
+                        }, 45000 * i);
                         console.log('@' + data.voter + ' Just voted now!');
                     }
                 }
@@ -50,21 +50,23 @@ steem.api.streamTransactions('head', function(err, result) {
     if (err) console.log(err);
 });
 
-function StreamVote(author, permalink, weight, comment, check_context = false) {
+function StreamVote(author, permalink, weight, comment, check_context) {
     try {
         steem.api.getContent(author, permalink, function(err, result) {
             if (!err) {
-                let hasVoted = false;
+                var hasVoted = false;
 
                 var v;
                 for(v = 0; v < result.active_votes.length; v++) {
                     const activeVote = result.active_votes[v];
 
-                    if (activeVote.voter === 'utopian-io') hasVoted = true;
+                    if (activeVote.voter === 'utopian-io') {
+                        hasVoted = true;
+                    }
                 }
 
-                if (!hasVoted && JSON.parse(result.json_metadata).tags[0] != 'utopian-io' && result.depth == 0) {
-                    if (check_context) {
+                if (!hasVoted && JSON.parse(result.json_metadata).tags[0] !== 'utopian-io' && result.depth === 0) {
+                    if (check_context === true) {
                         try {
                             nlu.analyze({
                                     text: result.body,
@@ -79,17 +81,19 @@ function StreamVote(author, permalink, weight, comment, check_context = false) {
 
                                     if (!err && response) {
                                         console.log(response);
-                                        let vote = false;
+                                        var vote = false;
                                         console.log('First check for labels');
-                                        var i;
-                                        for(i = 0; i < response.categories.length; i++) {
-                                            const category = response.categories[i];
+                                        var c;
+                                        for(c = 0; c < response.categories.length; c++) {
+                                            const category = response.categories[c];
 
-                                            if (labels.indexOf(category.label) > -1 && category.score > 0.55) vote = true;
+                                            if (labels.indexOf(category.label) > -1 && category.score >= 0.55) {
+                                                vote = true;
+                                            }
                                         }
                                         console.log(vote);
 
-                                        if (vote == true) {
+                                        if (vote === true) {
                                             applyVote(ACC_KEY, ACC_NAME, author, permalink, weight, comment);
                                         }
                                     }
@@ -98,7 +102,7 @@ function StreamVote(author, permalink, weight, comment, check_context = false) {
                             console.log(e)
                         }
                     }
-                    if (!check_context) {
+                    if (check_context === false) {
                         applyVote(ACC_KEY, ACC_NAME, author, permalink, weight, comment);
                     }
                 }
@@ -109,7 +113,6 @@ function StreamVote(author, permalink, weight, comment, check_context = false) {
     }catch(e) {
         console.log(e)
     }
-    return true;
 }
 
 function applyVote (ACC_KEY, ACC_NAME, author, permalink, weight, comment) {
