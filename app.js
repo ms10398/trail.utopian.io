@@ -16,7 +16,6 @@ const nlu = new NaturalLanguageUnderstandingV1({
 const ACC_NAME = config.accname,
     ACC_KEY = config.posting;
 console.log("Curation Trail Bot Script Running...");
-console.log("Waiting for votes from steemstem, steemmakers");
 
 steem.api.streamTransactions('head', function(err, result) {
     if (!err) {
@@ -58,6 +57,10 @@ function StreamVote(author, permalink, weight, comment, check_context) {
 
                 var v;
                 for(v = 0; v < result.active_votes.length; v++) {
+                    if(weight == 0)
+                    {
+                      break;
+                    }
                     const activeVote = result.active_votes[v];
 
                     if (activeVote.voter === 'utopian-io') {
@@ -65,7 +68,14 @@ function StreamVote(author, permalink, weight, comment, check_context) {
                     }
                 }
 
+                console.log(hasVoted);
+
                 if (!hasVoted && JSON.parse(result.json_metadata).tags[0] !== 'utopian-io' && result.depth === 0) {
+                    if(weight == 0)
+                    {
+                      applyVote(ACC_KEY, ACC_NAME, author, permalink, weight, comment);
+                    }
+                    else {
                     if (check_context === true) {
                         try {
                             nlu.analyze({
@@ -102,8 +112,10 @@ function StreamVote(author, permalink, weight, comment, check_context) {
                             console.log(e)
                         }
                     }
+
                     if (check_context === false) {
                         applyVote(ACC_KEY, ACC_NAME, author, permalink, weight, comment);
+                    }
                     }
                 }
             }
