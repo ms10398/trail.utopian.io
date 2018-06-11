@@ -55,19 +55,17 @@ function StreamVote(author, permalink, weight, comment, check_context) {
             if (!err) {
                 var hasVoted = false;
 
-                var v;
-                for(v = 0; v < result.active_votes.length; v++) {
-                    if(weight == 0)
-                    {
-                      break;
-                    }
-                    const activeVote = result.active_votes[v];
+                if (weight !== 0) {
+                    var v;
+                    for(v = 0; v < result.active_votes.length; v++) {
+                        const activeVote = result.active_votes[v];
 
-                    if (activeVote.voter === 'utopian-io') {
-                        hasVoted = true;
+                        if (activeVote.voter === 'utopian-io') {
+                            hasVoted = true;
+                        }
                     }
                 }
-
+               
                 console.log(hasVoted);
 
                 if (!hasVoted && JSON.parse(result.json_metadata).tags[0] !== 'utopian-io' && result.depth === 0) {
