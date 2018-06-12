@@ -24,12 +24,12 @@ steem.api.streamTransactions('head', function(err, result) {
             const data = result.operations[0][1];
             let weight = 0;
 
-            if (type === 'vote' && data.voter !== data.author) {
+            if (type === 'vote') {
                 var i;
                 for (i = 0; i < following.length; i++) {
                     const followed = following[i];
 
-                    if (data.voter == followed.account) {
+                    if (data.voter !== data.author && data.voter === followed.account || (data.voter === followed.account && followed.whitelisted === true)) {
                         console.log(data);
                         weight = Math.round(data.weight * followed.weight_divider);
                         weight = weight > followed.max_weight ? followed.max_weight : weight;
