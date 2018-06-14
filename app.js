@@ -51,6 +51,23 @@ steem.api.streamTransactions('head', function(err, result) {
 
 function StreamVote(author, permalink, weight, comment, check_context) {
     try {
+        if(weight === 0)
+        {
+          steem.api.getContentReplies(author, permalink, function(err, result) {
+            for(reply in result)
+            {
+              if(result[reply].author === ACC_NAME)
+              {
+                steem.broadcast.deleteComment(ACC_KEY, ACC_NAME, result[reply].permlink, function(err, result) {
+                    console.log(err, result);
+                    comment = `Unfortunately, your contribution's vote was removed,as the trailing community vote was removed.\n\nFor any inquiries, contact our support team at https://support.utopian.io/`;
+                    applyVote(ACC_KEY, ACC_NAME, author, permalink, weight, comment);
+                });
+              }
+            }
+          })
+        }
+        else {
         steem.api.getContent(author, permalink, function(err, result) {
             if (!err) {
                 var hasVoted = false;
@@ -65,7 +82,7 @@ function StreamVote(author, permalink, weight, comment, check_context) {
                         }
                     }
                 }
-               
+
                 console.log(hasVoted);
 
                 if (!hasVoted && JSON.parse(result.json_metadata).tags[0] !== 'utopian-io' && result.depth === 0) {
@@ -120,6 +137,7 @@ function StreamVote(author, permalink, weight, comment, check_context) {
 
             if (err) console.log(err);
         })
+      }
     }catch(e) {
         console.log(e)
     }
@@ -132,10 +150,8 @@ function applyVote (ACC_KEY, ACC_NAME, author, permalink, weight, comment) {
                 console.log(err);
             }
             if (!err && result) {
-                console.log('Voted Succesfully, permalink: ' + permalink + ', author: ' + author + ', weight: ' + weight / 100 + '%.');
-
                 const newpermlink = new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-
+                console.log('Voted Succesfully, permalink: ' + permalink + ', author: ' + author + ', weight: ' + weight / 100 + '%.');
                 steem.broadcast.comment(ACC_KEY, author, permalink, ACC_NAME, newpermlink, '', comment, {
                     tags: ['utopian.tip'],
                     app: 'utopian-io'
