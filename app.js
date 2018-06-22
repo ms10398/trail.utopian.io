@@ -112,7 +112,7 @@ function StreamVote(author, permalink, weight, comment, check_context) {
                                         for(c = 0; c < response.categories.length; c++) {
                                             const category = response.categories[c];
 
-                                            if (labels.includes(category.label) === true && category.score >= 0.55) {
+                                            if (labels.includes(category.label) === true && category.score >= 0.65) {
                                                 vote = true;
                                             }
                                         }
