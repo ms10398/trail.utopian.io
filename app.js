@@ -29,50 +29,64 @@ const nlu = new NaturalLanguageUnderstandingV1({
 const ACC_NAME = config.accname,
     ACC_KEY = config.posting;
 console.log("Curation Trail Bot Script Running...")
+function startTrail() {
+  try {
+    steem.api.streamTransactions('head', function(err, result) {
+        if (!err) {
+            try {
+                const type = result.operations[0][0];
+                const data = result.operations[0][1];
+                let weight = 0;
 
-try {
-  steem.api.streamTransactions('head', function(err, result) {
-      if (!err) {
-          try {
-              const type = result.operations[0][0];
-              const data = result.operations[0][1];
-              let weight = 0;
+                if (type === 'vote') {
+                    var i;
+                    for (i = 0; i < following.length; i++) {
+                        const followed = following[i];
 
-              if (type === 'vote') {
-                  var i;
-                  for (i = 0; i < following.length; i++) {
-                      const followed = following[i];
-
-                      if (data.voter !== data.author && data.voter === followed.account || (data.voter === followed.account && followed.whitelisted === true)) {
-                          weight = Math.round(data.weight * followed.weight_divider);
-                          weight = weight > followed.max_weight ? followed.max_weight : weight;
-                          var comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
-                          logger.log({
-                            level: 'info',
-                            message: `${data.voter} just voted ${data.author}/${data.permlink} by weight ${weight}`
-                          })
-                          console.log(data);
-                          setTimeout(function() {
-                              StreamVote(data.author, data.permlink, weight, comment, followed.check_context)
-                          }, 45000 * i);
-                          console.log('@' + data.voter + ' Just voted now!');
-                      }
-                  }
-              }
-          }catch(e) {
-              console.log(e)
+                        if (data.voter !== data.author && data.voter === followed.account || (data.voter === followed.account && followed.whitelisted === true)) {
+                            weight = Math.round(data.weight * followed.weight_divider);
+                            weight = weight > followed.max_weight ? followed.max_weight : weight;
+                            var comment = followed.comment.replace('{AUTHOR}', data.author).replace('{VOTER}', data.voter)
+                            logger.log({
+                              level: 'info',
+                              message: `${data.voter} just voted ${data.author}/${data.permlink} by weight ${weight}`
+                            })
+                            console.log(data);
+                            setTimeout(function() {
+                                StreamVote(data.author, data.permlink, weight, comment, followed.check_context)
+                            }, 45000 * i);
+                            console.log('@' + data.voter + ' Just voted now!');
+                        }
+                    }
+                }
+            }catch(e) {
+                console.log(e)
+            }
+        }
+        try {
+          if (err)
+          {
+            console.log(err);
+            throw `${err}`
           }
-      }
+        }
+        catch (e) {
+         console.log(e)
+         startTrail()
+       }
+    })
+  }
+  catch (e) {
+    logger.log({
+      level: 'info',
+      message: `${e}`
+    })
+    startTrail()
+  }
+}
 
-      if (err) console.log(err);
-  })
-}
-catch (e) {
-  logger.log({
-    level: 'info',
-    message: `${e}`
-  })
-}
+startTrail()
+
 
 function StreamVote(author, permalink, weight, comment, check_context) {
     try {
